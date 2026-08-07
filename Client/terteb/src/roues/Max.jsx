@@ -8,7 +8,7 @@ import Categories from "../comp/Categories.jsx";
 import Orders from "../comp/Orders.jsx";
 import Sales from "../comp/Sales.jsx";
 
-const Router = createBrowserRouter([
+const Max = createBrowserRouter([
   {
     path: "/",
     element: <Customer />,
@@ -51,4 +51,4 @@ const Router = createBrowserRouter([
   },
 ]);
 
-export default Router;
+export default Max;
