@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { heroNav } from "../data/heroNav";
 import { getCategories } from "../utils/heroNavUtils";
 
-export default function HeroNav({
+export default function Heron({
     section,
     setSection,
     selectedCategory,
