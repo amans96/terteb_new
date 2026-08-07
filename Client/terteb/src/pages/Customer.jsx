@@ -1,7 +1,7 @@
 import { useState } from "react";
-import Hero from "../comp/Hero";
-import HeroNav from "../comp/HeroNav";
-import MenuGrid from "../comp/MenuGrid";
+import Hero from "../comp/Hero.jsx";
+import HeroNav from "../comp/HeroNav.jsx";
+import MenuGrid from "../comp/MenuGrid.jsx";
 
 export default function Customer() {
   const [section, setSection] = useState("food");
