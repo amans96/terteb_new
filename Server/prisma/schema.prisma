@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MenuSection {
+  FOOD
+  DRINK
+}
+
+model MenuCategory {
+  id      String      @id @default(cuid())
+  name    String
+  section MenuSection
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items MenuItem[]
+
+  @@unique([name, section])
+}
+
+model MenuItem {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  image       String?
+  available   Boolean @default(true)
+  featured    Boolean @default(false)
+
+  categoryId String
+  category   MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique
+  tableNumber Int
+  items       OrderItem[]
+  total       Decimal     @db.Decimal(10, 2)
+  status      OrderStatus @default(PENDING)
+
+  paymentImage String?
+
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerName  String?
+  customerPhone String?
+  isTakeaway    Boolean @default(false)
+  paymentMethod PaymentMethod?
+  paid          Boolean @default(false)
+}
+
+model OrderItem {
+  id String @id @default(cuid())
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  quantity Int
+  price    Decimal @db.Decimal(10, 2)
+  subtotal Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id String @id @default(cuid())
+
+  name     String
+  email    String @unique
+  password String
+
+  role UserRole @default(STAFF)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  KITCHEN
+  CASHIER
+}
+
+enum OrderStatus {
+  PENDING
+  TAKEN
+  DECLINED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  QRIS
+  ONLINE
+  OTHER
+}
