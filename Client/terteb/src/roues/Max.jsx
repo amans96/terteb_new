@@ -33,7 +33,7 @@ const Max = createBrowserRouter([
       },
       {
         path: "menu",
-        element: <Menu />,
+        element: <Men />,
       },
       {
         path: "categories",

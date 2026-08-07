@@ -11,7 +11,7 @@ export default function Customer() {
     <>
       <Hero />
 
-      <HeroNav
+      <Heron
         section={section}
         setSection={setSection}
         selectedCategory={selectedCategory}
