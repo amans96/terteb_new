@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import FoodForm from "./FoodForm";
 
-export default function Menu() {
+export default function Men() {
   const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

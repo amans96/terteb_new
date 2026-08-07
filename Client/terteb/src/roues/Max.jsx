@@ -3,7 +3,7 @@ import Login from "../pages/Login.jsx";
 import Customer from "../pages/Customer.jsx";
 import Admin from "../pages/Admin.jsx";
 import Dashboard from "../comp/Dashboard.jsx";
-import Menu from "../comp/Menu.jsx";
+import Men from  "../comp/Men.jsx"
 import Categories from "../comp/Categories.jsx";
 import Orders from "../comp/Orders.jsx";
 import Sales from "../comp/Sales.jsx";
