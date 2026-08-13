@@ -4,7 +4,7 @@ import {
     getMenuItems,
     updateMenuItem,
     deleteMenuItems
-} from '../controllers/menuController.js';
+} from '../controllers/MenuController.js';
 const router =express.Router();
 router.post("/",createMenuItems);
 router.get("/",getMenuItems);
