@@ -1,16 +1,22 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import authService from '../services/authService';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+} from "react";
 
-// 1. Create the context
+import authService from "../services/authService";
+
 const AuthContext = createContext(null);
 
-// 2. Create the Provider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for existing token and user data on initial load
+  // ===============================
+  // CHECK LOGIN ON PAGE LOAD
+  // ===============================
   useEffect(() => {
     const initializeAuth = () => {
       try {
@@ -20,11 +26,19 @@ export const AuthProvider = ({ children }) => {
         if (token && currentUser) {
           setUser(currentUser);
           setIsAuthenticated(true);
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
         }
       } catch (error) {
-        console.error('Failed to initialize authentication state:', error);
+        console.error(
+          "Failed to initialize authentication:",
+          error
+        );
+
+        setUser(null);
+        setIsAuthenticated(false);
       } finally {
-        // Ensure loading is set to false whether auth check succeeds or fails
         setIsLoading(false);
       }
     };
@@ -32,25 +46,27 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  // Login handler
+  // ===============================
+  // LOGIN
+  // ===============================
   const login = async (email, password) => {
-    try {
-      const data = await authService.loginUser(email, password);
-      
-      setUser(data.user);
-      setIsAuthenticated(true);
-      
-      return data;
-    } catch (error) {
-      // Re-throw to allow the calling component to handle UI error states
-      throw error;
-    }
+    const data = await authService.loginUser(
+      email,
+      password
+    );
+
+    setUser(data.user);
+    setIsAuthenticated(true);
+
+    return data;
   };
 
-  // Logout handler
+  // ===============================
+  // LOGOUT
+  // ===============================
   const logout = () => {
     authService.logoutUser();
-    
+
     setUser(null);
     setIsAuthenticated(false);
   };
@@ -60,7 +76,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isLoading,
     login,
-    logout
+    logout,
   };
 
   return (
@@ -70,13 +86,17 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// 3. Create a custom hook for easy access to the context
+// ===============================
+// CUSTOM HOOK
+// ===============================
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  
+
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error(
+      "useAuth must be used within an AuthProvider"
+    );
   }
-  
+
   return context;
 };
