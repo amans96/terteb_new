@@ -36,7 +36,7 @@ ChartJS.register(
   Legend,
   Filler
 );
-
+    const API_URL = import.meta.env.VITE_API_URL;
 export default function Dashboard() {
   const [orders, setOrders] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
@@ -51,10 +51,12 @@ export default function Dashboard() {
       setLoading(true);
       setError("");
 
-      const [ordersResponse, menuResponse] = await Promise.all([
-        fetch("http://localhost:5000/api/orders"),
-        fetch("http://localhost:5000/api/menu"),
-      ]);
+
+
+const [ordersResponse, menuResponse] = await Promise.all([
+  fetch(`${API_URL}/api/orders`),
+  fetch(`${API_URL}/api/menu`),
+]);
 
       if (!ordersResponse.ok) throw new Error("Failed to fetch orders");
       if (!menuResponse.ok) throw new Error("Failed to fetch menu");

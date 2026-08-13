@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 import {
   ShoppingCart,
   Plus,
@@ -57,7 +58,7 @@ export default function MenuGrid({ section, selectedCategory }) {
   useEffect(() => {
     const fetchFoods = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/menu");
+        const res = await fetch(`${API_URL}/api/menu`);
         if (!res.ok) throw new Error("Failed to fetch menu");
         const data = await res.json();
         setFoods(data);
@@ -136,7 +137,7 @@ export default function MenuGrid({ section, selectedCategory }) {
     };
 
     try {
-      const res = await fetch("http://localhost:5000/api/orders", {
+      const res = await fetch(`${API_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),

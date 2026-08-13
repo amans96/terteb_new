@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function CategoryForm({
   onClose,
@@ -36,9 +37,9 @@ export default function CategoryForm({
     setSubmitting(true);
 
     try {
-      const url = editingCategory
-        ? `http://localhost:5000/api/categories/${editingCategory.id}`
-        : "http://localhost:5000/api/categories";
+   const url = editingCategory
+  ? `${API_URL}/api/categories/${editingCategory.id}`
+  : `${API_URL}/api/categories`;
 
       const method = editingCategory ? "PUT" : "POST";
 

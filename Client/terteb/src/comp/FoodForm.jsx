@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function FoodForm({
   onClose,
   onSuccess,
@@ -41,7 +43,7 @@ export default function FoodForm({
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/categories");
+      const res = await fetch(`${API_URL}/api/categories`);
       const data = await res.json();
       setCategories(data);
     } catch (error) {
@@ -85,7 +87,7 @@ export default function FoodForm({
     formData.append('image', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const response = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -118,8 +120,8 @@ export default function FoodForm({
       }
 
       const url = editingFood
-        ? `http://localhost:5000/api/menu/${editingFood.id}`
-        : "http://localhost:5000/api/menu";
+        ? `${API_URL}/api/menu/${editingFood.id}`
+        : `${API_URL}/api/menu`;
 
       const method = editingFood ? "PUT" : "POST";
 

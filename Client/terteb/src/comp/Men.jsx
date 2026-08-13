@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 import FoodForm from "./FoodForm";
 
 export default function Men() {
@@ -9,7 +10,7 @@ export default function Men() {
 
   const fetchFoods = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/menu");
+      const response = await fetch(`${API_URL}/api/menu`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch foods");
@@ -51,12 +52,9 @@ export default function Men() {
 
   const handleDeleteFood = async (id) => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/menu/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`${API_URL}/api/menu/${id}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete food");

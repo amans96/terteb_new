@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 import { 
   Clock, 
   CheckCircle2, 
@@ -20,7 +21,7 @@ export default function Orders() {
   // ===============================
   const fetchOrders = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/orders");
+      const response = await fetch(`${API_URL}/api/orders`);
       if (!response.ok) throw new Error("Failed to fetch orders");
       const data = await response.json();
       setOrders(data);
@@ -41,7 +42,7 @@ export default function Orders() {
   const updateStatus = async (id, status) => {
     try {
       setUpdatingOrder(id);
-      const response = await fetch(`http://localhost:5000/api/orders/${id}/status`, {
+      const response = await fetch(`${API_URL}/api/orders/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),

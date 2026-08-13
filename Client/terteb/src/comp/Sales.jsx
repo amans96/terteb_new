@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 import {
   ResponsiveContainer,
   AreaChart,
@@ -34,7 +35,7 @@ export default function Sales() {
       setError("");
 
       const response = await fetch(
-        `http://localhost:5000/api/orders/reports?period=${period}`
+        `${API_URL}/api/orders/reports?period=${period}`
       );
 
       if (!response.ok) {
