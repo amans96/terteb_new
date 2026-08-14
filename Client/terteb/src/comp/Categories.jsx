@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import CategoryForm from "./CategoryForm.jsx";
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Categories() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,7 @@ export default function Categories() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/categories/${id}`,
+        `${API_URL}/api/categories/${id}`,
         {
           method: "DELETE",
         }
