@@ -78,7 +78,7 @@ export default function Orders() {
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
     const yesterday = new Date();
-    yester.setDate(today.getDate() - 1);
+    yesterday.setDate(today.getDate() - 1);
 
     const isSameDay = (d1, d2) =>
       d1.getFullYear() === d2.getFullYear() &&
