@@ -131,10 +131,9 @@ export const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
 
-    // Only these statuses are allowed
     const allowedStatuses = [
       "PENDING",
-      "TAKEN",
+      "ACCEPTED",
       "DECLINED",
     ];
 
