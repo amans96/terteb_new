@@ -5,7 +5,6 @@ import {
     updateMenuItem,
     deleteMenuItems
 } from '../controllers/MenuController.js';
-const router =express.Router();
 router.post("/",createMenuItems);
 router.get("/",getMenuItems);
 router.get("/:id", getMenuItems); 

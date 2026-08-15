@@ -85,20 +85,25 @@ export const updateMenuItem = async (req, res) => {
 
 // Delete food
 export const deleteMenuItems = async (req, res) => {
-    try {
-        await prisma.menuItem.delete({
-            where: {
-                id: req.params.id
-            }
-        });
+  try {
+    console.log("Deleting menu item:", req.params.id);
 
-        res.json({
-            message: "Food deleted successfully"
-        });
+    const deletedItem = await prisma.menuItem.delete({
+      where: {
+        id: req.params.id,
+      },
+    });
 
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        });
-    }
+    res.json({
+      message: "Food deleted successfully",
+      item: deletedItem,
+    });
+  } catch (error) {
+    console.error("DELETE MENU ITEM ERROR:", error);
+
+    res.status(500).json({
+      message: error.message,
+      error: error.code,
+    });
+  }
 };
