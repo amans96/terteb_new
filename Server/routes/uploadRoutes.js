@@ -21,7 +21,7 @@ const upload = multer({ storage });
 
 router.post("/", upload.single("image"), (req, res) => {
   res.json({
-  imageUrl: `https://terteb-new-5.onrender.com/uploads/${req.file.filename}`,
+    imageUrl: `https://terteb-new-1.onrender.com/uploads/${req.file.filename}`,
   });
 });
 
