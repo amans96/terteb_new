@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-const API_URL = import.meta.env.VITE_API_URL;
 import { 
   Clock, 
   CheckCircle2, 
@@ -9,6 +8,8 @@ import {
   Loader2,
   Inbox
 } from "lucide-react";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -77,7 +78,7 @@ export default function Orders() {
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
     const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
+    yester.setDate(today.getDate() - 1);
 
     const isSameDay = (d1, d2) =>
       d1.getFullYear() === d2.getFullYear() &&
@@ -163,7 +164,7 @@ export default function Orders() {
             }`}
           >
             <CheckCircle2 className="w-4 h-4" />
-            Taken
+            Accepted
             <span className={`ml-1.5 px-2 py-0.5 rounded-full text-xs ${activeTab === 'TAKEN' ? 'bg-emerald-100' : 'bg-gray-300'}`}>
               {takenCount}
             </span>
@@ -181,7 +182,7 @@ export default function Orders() {
           </div>
           <p className="text-lg font-bold text-gray-900 mb-1">No orders found</p>
           <p className="text-gray-500 text-sm">
-            {activeTab === "PENDING" ? "You're all caught up! No pending orders right now." : "No orders have been taken yet."}
+            {activeTab === "PENDING" ? "You're all caught up! No pending orders right now." : "No orders have been accepted yet."}
           </p>
         </div>
       ) : (
