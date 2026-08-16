@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
+
 import authRoutes from "./routes/authRoutes.js";
 import menuRoutes from "./routes/menuRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
@@ -12,25 +12,74 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+// =====================================
+// CORS
+// =====================================
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://terteb-new-order.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow Postman and server-to-server requests
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.log("CORS blocked origin:", origin);
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
+
+// =====================================
+// BODY PARSING
+// =====================================
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Make uploaded images public
+// =====================================
+// UPLOADED IMAGES
+// =====================================
+
 app.use("/uploads", express.static("uploads"));
 
+// =====================================
+// API ROUTES
+// =====================================
+
+app.use("/api/auth", authRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/orders", orderRoutes);
+
+// =====================================
+// ROOT
+// =====================================
+
 app.get("/", (req, res) => {
-  res.send("Terteb API running");
+  res.json({
+    message: "Terteb API running",
+  });
 });
-app.use(express.json());
-app.use("/api/auth", authRoutes);
+
+// =====================================
+// SERVER
+// =====================================
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
