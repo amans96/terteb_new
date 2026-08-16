@@ -18,12 +18,26 @@ export default function Orders() {
   const [updatingOrder, setUpdatingOrder] = useState(null);
 
   // ===============================
-  // FETCH ORDERS
+  // FETCH ORDERS - FIXED ✅
   // ===============================
   const fetchOrders = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/orders`);
-      if (!response.ok) throw new Error("Failed to fetch orders");
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/api/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Token expired or invalid - redirect to login
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          return;
+        }
+        throw new Error("Failed to fetch orders");
+      }
       const data = await response.json();
       setOrders(data);
     } catch (error) {
@@ -38,18 +52,29 @@ export default function Orders() {
   }, []);
 
   // ===============================
-  // UPDATE STATUS
+  // UPDATE STATUS - FIXED ✅
   // ===============================
   const updateStatus = async (id, status) => {
     try {
       setUpdatingOrder(id);
+      const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/orders/${id}/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ status }),
       });
 
-      if (!response.ok) throw new Error("Failed to update order");
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          return;
+        }
+        throw new Error("Failed to update order");
+      }
 
       // Optimistically update UI for speed, then fetch in background
       setOrders((prev) => 
