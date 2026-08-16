@@ -11,10 +11,10 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Customer creates an order
+// Customer
 router.post("/", createOrder);
 
-// Admin routes
+// Admin
 router.get("/", protect, getOrders);
 router.patch("/:id/status", protect, updateOrderStatus);
 router.get("/reports", protect, getSalesReport);
