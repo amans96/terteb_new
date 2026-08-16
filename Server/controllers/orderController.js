@@ -131,14 +131,11 @@ export const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
 
-const allowedStatuses = [
-  "PENDING",
-  "PREPARING",
-  "READY",
-  "SERVED",
-  "PAID",
-  "CANCELLED",
-];
+    const allowedStatuses = [
+      "PENDING",
+      "TAKEN",
+      "DECLINED",
+    ];
 
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({
