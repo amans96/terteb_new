@@ -9,6 +9,9 @@ import {
   Inbox
 } from "lucide-react";
 
+// ✅ ADDED: Import your authService so the component gets the token the exact same way as AuthContext
+import authService from "../services/authService";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Orders() {
@@ -22,7 +25,9 @@ export default function Orders() {
   // ===============================
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem('token');
+      // ✅ CHANGED: Use authService instead of localStorage directly
+      const token = authService.getToken();
+      
       const response = await fetch(`${API_URL}/api/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -32,7 +37,8 @@ export default function Orders() {
       if (!response.ok) {
         if (response.status === 401) {
           // Token expired or invalid - redirect to login
-          localStorage.removeItem('token');
+          // ✅ CHANGED: Use your authService to cleanly remove the user session
+          authService.logoutUser();
           window.location.href = '/login';
           return;
         }
@@ -57,7 +63,10 @@ export default function Orders() {
   const updateStatus = async (id, status) => {
     try {
       setUpdatingOrder(id);
-      const token = localStorage.getItem('token');
+      
+      // ✅ CHANGED: Use authService instead of localStorage directly
+      const token = authService.getToken();
+      
       const response = await fetch(`${API_URL}/api/orders/${id}/status`, {
         method: "PATCH",
         headers: { 
@@ -69,7 +78,8 @@ export default function Orders() {
 
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.removeItem('token');
+          // ✅ CHANGED: Use your authService to cleanly remove the user session
+          authService.logoutUser();
           window.location.href = '/login';
           return;
         }
