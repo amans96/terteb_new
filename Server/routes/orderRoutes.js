@@ -4,23 +4,21 @@ import {
   createOrder,
   getOrders,
   updateOrderStatus,
-  getSalesReport,
+  getSalesReport
 } from "../controllers/orderController.js";
-
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Customer creates an order
 router.post("/", createOrder);
 
-// Admin gets orders
+router.get("/", getOrders);
+
+router.get("/reports", getSalesReport);
+
+router.patch("/:id/status", updateOrderStatus);
+
 router.get("/", protect, getOrders);
-
-// Admin updates order status
 router.patch("/:id/status", protect, updateOrderStatus);
-
-// Admin sales report
-router.get("/reports", protect, getSalesReport);
-
+router.get("/sales/report", protect, getSalesReport);
 export default router;
