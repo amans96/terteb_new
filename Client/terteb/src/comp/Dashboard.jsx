@@ -25,6 +25,9 @@ import {
   XCircle
 } from "lucide-react";
 
+// ✅ ADDED: Import your authService
+import authService from "../services/authService";
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -36,7 +39,9 @@ ChartJS.register(
   Legend,
   Filler
 );
-    const API_URL = import.meta.env.VITE_API_URL;
+
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Dashboard() {
   const [orders, setOrders] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
@@ -51,12 +56,28 @@ export default function Dashboard() {
       setLoading(true);
       setError("");
 
+      // ✅ ADDED: Get token from authService
+      const token = authService.getToken();
+      
+      // ✅ ADDED: Headers with Authorization token
+      const fetchOptions = {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      };
 
+      const [ordersResponse, menuResponse] = await Promise.all([
+        fetch(`${API_URL}/api/orders`, fetchOptions),
+        fetch(`${API_URL}/api/menu`, fetchOptions),
+      ]);
 
-const [ordersResponse, menuResponse] = await Promise.all([
-  fetch(`${API_URL}/api/orders`),
-  fetch(`${API_URL}/api/menu`),
-]);
+      // ✅ ADDED: Handle 401 Unauthorized specifically
+      if (ordersResponse.status === 401 || menuResponse.status === 401) {
+        authService.logoutUser();
+        window.location.href = '/login';
+        return;
+      }
 
       if (!ordersResponse.ok) throw new Error("Failed to fetch orders");
       if (!menuResponse.ok) throw new Error("Failed to fetch menu");
@@ -126,7 +147,7 @@ const [ordersResponse, menuResponse] = await Promise.all([
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
-  const takenOrders = orders.filter((order) => order.status === "TAKEN");
+const takenOrders = orders.filter((order) => order.status === "PREPARING");
 
   const todaysTakenOrders = takenOrders.filter((order) => {
     const date = new Date(order.createdAt);
@@ -164,7 +185,7 @@ const [ordersResponse, menuResponse] = await Promise.all([
       const index = orderDay === 0 ? 6 : orderDay - 1;
 
       weeklyOrders[index] += 1;
-      if (order.status === "TAKEN") {
+      if (order.status === "PREPARING") {
         weeklySales[index] += Number(order.total);
       }
     }
@@ -238,7 +259,7 @@ const [ordersResponse, menuResponse] = await Promise.all([
   // ==========================================
   const totalOrderCount = orders.length;
   const pendingCount = orders.filter((order) => order.status === "PENDING").length;
-  const declinedCount = orders.filter((order) => order.status === "DECLINED").length;
+const declinedCount = orders.filter((order) => order.status === "CANCELLED").length;
 
   const takenPercentage = totalOrderCount > 0 ? Math.round((takenOrders.length / totalOrderCount) * 100) : 0;
   const pendingPercentage = totalOrderCount > 0 ? Math.round((pendingCount / totalOrderCount) * 100) : 0;

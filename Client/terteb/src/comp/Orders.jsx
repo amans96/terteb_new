@@ -3,13 +3,10 @@ import {
   Clock, 
   CheckCircle2, 
   Calendar, 
-  ChevronRight, 
   Utensils, 
   Loader2,
   Inbox
 } from "lucide-react";
-
-// ✅ ADDED: Import your authService so the component gets the token the exact same way as AuthContext
 import authService from "../services/authService";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -20,12 +17,8 @@ export default function Orders() {
   const [activeTab, setActiveTab] = useState("PENDING");
   const [updatingOrder, setUpdatingOrder] = useState(null);
 
-  // ===============================
-  // FETCH ORDERS - FIXED ✅
-  // ===============================
   const fetchOrders = async () => {
     try {
-      // ✅ CHANGED: Use authService instead of localStorage directly
       const token = authService.getToken();
       
       const response = await fetch(`${API_URL}/api/orders`, {
@@ -36,8 +29,6 @@ export default function Orders() {
       });
       if (!response.ok) {
         if (response.status === 401) {
-          // Token expired or invalid - redirect to login
-          // ✅ CHANGED: Use your authService to cleanly remove the user session
           authService.logoutUser();
           window.location.href = '/login';
           return;
@@ -57,14 +48,13 @@ export default function Orders() {
     fetchOrders();
   }, []);
 
-  // ===============================
-  // UPDATE STATUS - FIXED ✅
-  // ===============================
+  // ==========================================
+  // DEBUG VERSION OF UPDATE STATUS
+  // ==========================================
   const updateStatus = async (id, status) => {
     try {
+      console.log(`🟡 1. Attempting to update order ${id} to status: ${status}`);
       setUpdatingOrder(id);
-      
-      // ✅ CHANGED: Use authService instead of localStorage directly
       const token = authService.getToken();
       
       const response = await fetch(`${API_URL}/api/orders/${id}/status`, {
@@ -76,35 +66,45 @@ export default function Orders() {
         body: JSON.stringify({ status }),
       });
 
+      console.log(`🟡 2. Backend responded with HTTP Status: ${response.status}`);
+
       if (!response.ok) {
         if (response.status === 401) {
-          // ✅ CHANGED: Use your authService to cleanly remove the user session
+          console.error("🔴 401 Unauthorized - redirecting to login");
           authService.logoutUser();
           window.location.href = '/login';
           return;
         }
-        throw new Error("Failed to update order");
+        
+        // 🚨 DEBUG: Grab the exact error message from the backend!
+        const errorData = await response.text(); 
+        console.error("🔴 3. BACKEND ERROR DETAILS:", errorData);
+        
+        // Show an alert on the screen so you can't miss it
+        alert(`Backend Error (${response.status}):\n\n${errorData}`);
+        
+        throw new Error(`Server returned ${response.status}: ${errorData}`);
       }
 
-      // Optimistically update UI for speed, then fetch in background
+      console.log("🟢 4. Update successful!");
+      
+      // Optimistically update UI
       setOrders((prev) => 
         prev.map((o) => (o.id === id ? { ...o, status } : o))
       );
 
-      if (status === "TAKEN") setActiveTab("TAKEN");
-      if (status === "DECLINED") setActiveTab("PENDING");
+      if (status === "PREPARING") setActiveTab("PREPARING");
+      if (status === "CANCELLED") setActiveTab("PENDING");
 
-      fetchOrders(); // Refresh in background to sync with server
+      fetchOrders(); 
     } catch (error) {
-      console.log(error);
+      console.error("🔴 5. CATCH BLOCK TRIGGERED:", error);
     } finally {
       setUpdatingOrder(null);
     }
   };
+  // ==========================================
 
-  // ===============================
-  // DATE GROUPING HELPERS
-  // ===============================
   const getGroupLabel = (dateString) => {
     if (!dateString) return "Unknown Date";
     
@@ -131,12 +131,10 @@ export default function Orders() {
     });
   };
 
-  // Filter and sort newest first
   const filteredOrders = orders
     .filter((order) => order.status === activeTab)
     .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-  // Group by Date Label
   const groupedOrders = filteredOrders.reduce((acc, order) => {
     const label = getGroupLabel(order.createdAt);
     if (!acc[label]) acc[label] = [];
@@ -145,11 +143,8 @@ export default function Orders() {
   }, {});
 
   const pendingCount = orders.filter((o) => o.status === "PENDING").length;
-  const takenCount = orders.filter((o) => o.status === "TAKEN").length;
+  const takenCount = orders.filter((o) => o.status === "PREPARING").length;
 
-  // ===============================
-  // LOADING STATE
-  // ===============================
   if (loading) {
     return (
       <div className="min-h-[500px] flex flex-col items-center justify-center">
@@ -162,9 +157,6 @@ export default function Orders() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 bg-gray-50/30 min-h-screen">
       
-      {/* ==============================
-          HEADER & TABS
-      ============================== */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Order Management</h1>
@@ -173,7 +165,6 @@ export default function Orders() {
           </p>
         </div>
 
-        {/* Custom Segmented Control */}
         <div className="inline-flex bg-gray-200/70 p-1 rounded-xl w-full sm:w-auto overflow-hidden">
           <button
             onClick={() => setActiveTab("PENDING")}
@@ -191,25 +182,22 @@ export default function Orders() {
           </button>
           
           <button
-            onClick={() => setActiveTab("TAKEN")}
+            onClick={() => setActiveTab("PREPARING")}
             className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-              activeTab === "TAKEN"
+              activeTab === "PREPARING"
                 ? "bg-white text-emerald-600 shadow-sm ring-1 ring-black/5"
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-200"
             }`}
           >
             <CheckCircle2 className="w-4 h-4" />
             Accepted
-            <span className={`ml-1.5 px-2 py-0.5 rounded-full text-xs ${activeTab === 'TAKEN' ? 'bg-emerald-100' : 'bg-gray-300'}`}>
+            <span className={`ml-1.5 px-2 py-0.5 rounded-full text-xs ${activeTab === 'PREPARING' ? 'bg-emerald-100' : 'bg-gray-300'}`}>
               {takenCount}
             </span>
           </button>
         </div>
       </div>
 
-      {/* ==============================
-          GROUPED ORDERS RENDER
-      ============================== */}
       {Object.keys(groupedOrders).length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-gray-100 shadow-sm">
           <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
@@ -225,7 +213,6 @@ export default function Orders() {
           {Object.entries(groupedOrders).map(([dateLabel, dateOrders]) => (
             <div key={dateLabel} className="space-y-4">
               
-              {/* Date Header */}
               <div className="flex items-center gap-3 pb-2 border-b border-gray-200">
                 <Calendar className="w-5 h-5 text-gray-400" />
                 <h2 className="text-lg font-bold text-gray-900">{dateLabel}</h2>
@@ -234,7 +221,6 @@ export default function Orders() {
                 </span>
               </div>
 
-              {/* Desktop Table View */}
               <div className="hidden md:block bg-white shadow-sm border border-gray-100 rounded-xl overflow-hidden">
                 <table className="w-full text-left border-collapse">
                   <thead className="bg-gray-50/50">
@@ -249,8 +235,6 @@ export default function Orders() {
                   <tbody className="divide-y divide-gray-100">
                     {dateOrders.map((order) => (
                       <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
-                        
-                        {/* Order ID */}
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="font-bold text-gray-900">#{order.orderNumber}</span>
                           {order.createdAt && (
@@ -259,8 +243,6 @@ export default function Orders() {
                             </p>
                           )}
                         </td>
-
-                        {/* Destination */}
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${
                             order.isTakeaway ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'
@@ -268,8 +250,6 @@ export default function Orders() {
                             {order.isTakeaway ? "Takeaway" : `Table ${order.tableNumber}`}
                           </span>
                         </td>
-
-                        {/* Items */}
                         <td className="px-6 py-4">
                           <div className="space-y-1">
                             {order.items.map((item) => (
@@ -280,26 +260,22 @@ export default function Orders() {
                             ))}
                           </div>
                         </td>
-
-                        {/* Total */}
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="font-bold text-gray-900">{order.total.toLocaleString()} Birr</span>
                         </td>
-
-                        {/* Actions */}
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           {order.status === "PENDING" ? (
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 disabled={updatingOrder === order.id}
-                                onClick={() => updateStatus(order.id, "DECLINED")}
+                                onClick={() => updateStatus(order.id, "CANCELLED")}
                                 className="px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                               >
                                 Decline
                               </button>
                               <button
                                 disabled={updatingOrder === order.id}
-                                onClick={() => updateStatus(order.id, "TAKEN")}
+                                onClick={() => updateStatus(order.id, "PREPARING")}
                                 className="px-4 py-2 text-sm font-bold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
                               >
                                 {updatingOrder === order.id && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -319,12 +295,9 @@ export default function Orders() {
                 </table>
               </div>
 
-              {/* Mobile Cards View */}
               <div className="md:hidden space-y-4">
                 {dateOrders.map((order) => (
                   <div key={order.id} className="bg-white shadow-sm border border-gray-100 rounded-xl overflow-hidden">
-                    
-                    {/* Header */}
                     <div className="p-4 border-b border-gray-100 flex items-start justify-between bg-gray-50/50">
                       <div>
                         <span className="font-bold text-gray-900 text-lg">#{order.orderNumber}</span>
@@ -334,44 +307,24 @@ export default function Orders() {
                           }`}>
                             {order.isTakeaway ? "Takeaway" : `Table ${order.tableNumber}`}
                           </span>
-                          {order.createdAt && (
-                            <span className="text-xs text-gray-500 font-medium">
-                              {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          )}
                         </div>
                       </div>
-                      
                       <span className="font-extrabold text-emerald-600">{order.total.toLocaleString()} Birr</span>
                     </div>
 
-                    {/* Items */}
-                    <div className="p-4">
-                      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Order Items</h3>
-                      <div className="space-y-2">
-                        {order.items.map((item) => (
-                          <div key={item.id} className="flex justify-between items-center text-sm">
-                            <span className="font-medium text-gray-700">{item.menuItem.name}</span>
-                            <span className="text-gray-500 font-medium bg-gray-100 px-2 rounded">x{item.quantity}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Actions */}
                     <div className="p-4 pt-0">
                       {order.status === "PENDING" ? (
                         <div className="flex gap-3 pt-4 border-t border-gray-100">
                           <button
                             disabled={updatingOrder === order.id}
-                            onClick={() => updateStatus(order.id, "DECLINED")}
+                            onClick={() => updateStatus(order.id, "CANCELLED")}
                             className="flex-1 py-2.5 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors disabled:opacity-50"
                           >
                             Decline
                           </button>
                           <button
                             disabled={updatingOrder === order.id}
-                            onClick={() => updateStatus(order.id, "TAKEN")}
+                            onClick={() => updateStatus(order.id, "PREPARING")}
                             className="flex-1 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                           >
                             {updatingOrder === order.id && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -379,7 +332,7 @@ export default function Orders() {
                           </button>
                         </div>
                       ) : (
-                        <div className="w-full py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-emerald-700 bg-emerald-50 rounded-xl">
+                        <div className="w-full py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-emerald-700 bg-emerald-50 rounded-xl mt-4">
                           <CheckCircle2 className="w-4 h-4" />
                           Order Accepted
                         </div>

@@ -50,21 +50,26 @@ export default function Men() {
     setEditingFood(null);
   };
 
-  const handleDeleteFood = async (id) => {
+ const handleDeleteFood = async (id) => {
     try {
       const response = await fetch(`${API_URL}/api/menu/${id}`, {
         method: "DELETE",
       });
 
+      // ✅ Parse the exact error message from our new backend
       if (!response.ok) {
-        throw new Error("Failed to delete food");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete food");
       }
 
-      alert("Food deleted successfully");
-      fetchFoods();
+      alert("Food permanently deleted!");
+      
+      // This forces the list to refresh and the food will disappear
+      fetchFoods(); 
     } catch (error) {
       console.log("Delete error:", error);
-      alert(error.message);
+      // This will pop up and tell you if it's blocked by past orders!
+      alert(error.message); 
     }
   };
 
