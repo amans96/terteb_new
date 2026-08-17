@@ -20,8 +20,10 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://terteb-new-order.vercel.app",
   "https://terteb-new-os.vercel.app/",
-   "http://localhost:517"
+   "http://localhost:517",
+    "https://terteb-os-new.vercel.app"
 ];
+
 
 app.use(
   cors({
