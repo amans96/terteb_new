@@ -223,7 +223,7 @@ export default function MenuGrid({ section, selectedCategory }) {
           
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-            {foods.map((food) => {
+           {foods.filter((food) => food.available === true).map((food) => {
               const style = getCategoryStyle(food.category);
               const categoryName = getCategoryName(food.category);
 
