@@ -83,24 +83,28 @@ export const updateMenuItem = async (req, res) => {
     }
 };
 
-// Delete food
+// Delete food (FIXED TO HARD DELETE)
 export const deleteMenuItems = async (req, res) => {
   try {
-    const item = await prisma.menuItem.update({
+    const item = await prisma.menuItem.delete({
       where: {
         id: req.params.id,
-      },
-      data: {
-        available: false,
       },
     });
 
     res.json({
-      message: "Food removed from the menu successfully",
+      message: "Food permanently removed from the menu",
       item,
     });
   } catch (error) {
     console.error("DELETE MENU ITEM ERROR:", error);
+    
+    // Check if Prisma blocked the deletion because of existing orders
+    if (error.code === 'P2003') {
+      return res.status(400).json({
+        message: "Cannot delete this food because it is attached to past orders. Please edit it to be unavailable instead.",
+      });
+    }
 
     res.status(500).json({
       message: error.message,

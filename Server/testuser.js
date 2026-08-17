@@ -1,19 +1,14 @@
+import bcrypt from "bcrypt";
 import prisma from "./lib/prisma.js";
 
-async function test() {
-  try {
-    const users = await prisma.user.findMany();
+const password = await bcrypt.hash("Test1234", 10);
 
-    console.log("Users table works ✅");
-    console.log(users);
+const user = await prisma.user.create({
+  data: {
+    name: "admin",
+    password,
+  },
+});
 
-  } catch (error) {
-    console.log("User table does NOT exist ❌");
-    console.log(error.message);
-
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-test();
+console.log("Test user created:", user);
+await prisma.$disconnect();

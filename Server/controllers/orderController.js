@@ -2,6 +2,8 @@ import prisma from "../lib/prisma.js";
 
 const VALID_ORDER_STATUSES = Object.freeze([
   "PENDING",
+  "TAKEN",       // ✅ Added to match frontend
+  "DECLINED",    // ✅ Added to match frontend
   "PREPARING",
   "READY",
   "SERVED",
@@ -181,7 +183,7 @@ export const updateOrderStatus = async (req, res) => {
 };
 
 // ===============================
-// GET SALES REPORT - FIXED ✅
+// GET SALES REPORT
 // ===============================
 export const getSalesReport = async (req, res) => {
   try {
