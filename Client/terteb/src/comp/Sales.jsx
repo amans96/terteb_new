@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 const API_URL = import.meta.env.VITE_API_URL;
+
+// Added your authService import here
+import authService from "../services/authService";
+
 import {
   ResponsiveContainer,
   AreaChart,
@@ -34,11 +38,25 @@ export default function Sales() {
       setLoading(true);
       setError("");
 
+      // 1. Get the token
+      const token = authService.getToken();
+
+      // 2. Pass the token in the headers
       const response = await fetch(
-        `${API_URL}/api/orders/reports?period=${period}`
+        `${API_URL}/api/orders/reports?period=${period}`,
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
       );
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Unauthorized: Please log in again.");
+        }
         throw new Error("Failed to load sales report");
       }
 

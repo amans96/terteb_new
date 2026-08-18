@@ -21,8 +21,7 @@ const menuItems = [
   { title: "Categories", icon: Tags, path: "/admin/categories" },
   { title: "Orders", icon: ShoppingCart, path: "/admin/orders" },
   { title: "Sales", icon: BarChart3, path: "/admin/sales" },
-  { title: "Customers", icon: Users, path: "/admin/customers" },
-  { title: "Settings", icon: Settings, path: "/admin/settings" },
+
 ];
 
 export default function Sidebar() {
