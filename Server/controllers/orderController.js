@@ -185,43 +185,31 @@ export const updateOrderStatus = async (req, res) => {
 // ===============================
 // GET SALES REPORT
 // ===============================
+// ===============================
+// GET SALES REPORT
+// ===============================
 export const getSalesReport = async (req, res) => {
   try {
     const { period = "daily" } = req.query;
     
-    // ✅ FIXED: Use current date instead of hardcoded date
     const now = new Date();
     let startDate;
 
     if (period === "daily") {
-      startDate = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate()
-      );
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     } else if (period === "weekly") {
       const day = now.getDay();
       const difference = day === 0 ? 6 : day - 1;
-      startDate = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() - difference
-      );
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - difference);
     } else if (period === "monthly") {
-      startDate = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        1
-      );
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     } else {
-      return res.status(400).json({
-        message: "Invalid report period.",
-      });
+      return res.status(400).json({ message: "Invalid report period." });
     }
 
     const orders = await prisma.order.findMany({
       where: {
-        status: "PAID",
+        status: "PREPARING", // ✅ Changed from "PAID" to "TAKEN"
         createdAt: {
           gte: startDate,
           lte: now,
@@ -235,7 +223,7 @@ export const getSalesReport = async (req, res) => {
         },
       },
       orderBy: {
-        createdAt: "asc",
+        createdAt: "asc", 
       },
     });
 
@@ -250,26 +238,21 @@ export const getSalesReport = async (req, res) => {
       (sum, order) => {
         return (
           sum +
-          order.items.reduce(
-            (itemSum, item) => itemSum + item.quantity,
-            0
-          )
+          order.items.reduce((itemSum, item) => itemSum + item.quantity, 0)
         );
       },
       0
     );
 
-    const averageOrderValue =
-      totalOrders > 0
-        ? totalRevenue / totalOrders
-        : 0;
+    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
     const productMap = {};
+    const chartDataMap = {};
 
     orders.forEach((order) => {
+      // Build Best Selling Items Data
       order.items.forEach((item) => {
         const id = item.menuItemId;
-
         if (!productMap[id]) {
           productMap[id] = {
             menuItemId: id,
@@ -278,14 +261,37 @@ export const getSalesReport = async (req, res) => {
             revenue: 0,
           };
         }
-
         productMap[id].quantity += item.quantity;
         productMap[id].revenue += Number(item.subtotal);
       });
+
+      // Build Chart Data (Group by time)
+      const orderDate = new Date(order.createdAt);
+      let label = "";
+
+      if (period === "daily") {
+        label = `${orderDate.getHours()}:00`; 
+      } else if (period === "weekly") {
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        label = days[orderDate.getDay()];
+      } else if (period === "monthly") {
+        label = `${orderDate.toLocaleString('default', { month: 'short' })} ${orderDate.getDate()}`;
+      }
+
+      if (!chartDataMap[label]) {
+        chartDataMap[label] = 0;
+      }
+      chartDataMap[label] += Number(order.total);
     });
 
-    const bestSellingItems = Object.values(productMap)
-      .sort((a, b) => b.quantity - a.quantity);
+    const bestSellingItems = Object.values(productMap).sort(
+      (a, b) => b.quantity - a.quantity
+    );
+
+    const chartData = Object.keys(chartDataMap).map((label) => ({
+      label,
+      revenue: chartDataMap[label],
+    }));
 
     res.json({
       period,
@@ -298,9 +304,9 @@ export const getSalesReport = async (req, res) => {
         averageOrderValue,
       },
       bestSellingItems,
+      chartData,
       orders,
     });
-
   } catch (error) {
     console.error("SALES REPORT ERROR:", error);
     res.status(500).json({
