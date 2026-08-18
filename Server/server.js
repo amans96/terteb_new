@@ -21,7 +21,7 @@ const allowedOrigins = [
   "https://terteb-new-order.vercel.app",
   "https://terteb-new-os.vercel.app/",
    "https://localhost:5175",
-    "https://terteb-os-new.vercel.app"
+ "https://terteb-new-gs6y.vercel.app"
 ];
 
 
