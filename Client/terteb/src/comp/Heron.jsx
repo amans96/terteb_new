@@ -17,8 +17,21 @@ export default function HeroNav({
     const fetchCategories = async () => {
       try {
         // Replace this URL with your actual backend endpoint route
-        const res = await fetch(`${API_URL}/api/categories`);
-        if (!res.ok) throw new Error("Failed to fetch");
+     const res = await fetch(`${API_URL}/api/categories`);
+
+if (!res.ok) {
+  const errorDetails = await res.text();
+
+  console.error("Categories API failed:", {
+    url: `${API_URL}/api/categories`,
+    status: res.status,
+    response: errorDetails,
+  });
+
+  throw new Error(
+    `Failed to load categories (${res.status}): ${errorDetails}`
+  );
+}
         
         const data = await res.json();
         setCategories(data);
