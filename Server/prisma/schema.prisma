@@ -91,6 +91,7 @@ enum UserRole {
 }
 
 enum OrderStatus {
+
   PENDING
   TAKEN
   DECLINED
@@ -99,6 +100,7 @@ enum OrderStatus {
   SERVED
   PAID
   CANCELLED
+}
 
 
 enum PaymentMethod {
