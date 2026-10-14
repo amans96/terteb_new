@@ -99,7 +99,7 @@ enum OrderStatus {
   SERVED
   PAID
   CANCELLED
-
+}
 
 enum PaymentMethod {
   CASH
