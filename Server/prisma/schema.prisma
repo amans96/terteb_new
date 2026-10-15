@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -39,20 +40,15 @@ model Order {
   tableNumber   Int
   total         Decimal        @db.Decimal(10, 2)
   status        OrderStatus    @default(PENDING)
-
   notes         String?
-
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-
   customerName  String?
   customerPhone String?
   isTakeaway    Boolean        @default(false)
-
   paymentMethod PaymentMethod?
   paid          Boolean        @default(false)
   paymentImage  String?
-
   items         OrderItem[]
 }
 
@@ -91,7 +87,6 @@ enum UserRole {
 }
 
 enum OrderStatus {
-
   PENDING
   TAKEN
   DECLINED
@@ -101,7 +96,6 @@ enum OrderStatus {
   PAID
   CANCELLED
 }
-
 
 enum PaymentMethod {
   CASH
