@@ -1,11 +1,10 @@
 import axios from 'axios';
 
-// Use Vite's environment variable for the backend base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+// Use Vite's environment variable for the backend base URL (ends with /api)
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
-// ✅ FIXED: Added '/api' to the base URL
 const apiClient = axios.create({
-  baseURL: `${API_BASE_URL}/api/auth`, // ← CHANGED from '/auth' to '/api/auth'
+  baseURL: `${API_BASE_URL}/auth`,
   headers: {
     'Content-Type': 'application/json',
   },

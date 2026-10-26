@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"; 
 import { heroNav } from "../data/heroNav";
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
 export default function HeroNav({ 
   section,
@@ -17,13 +17,13 @@ export default function HeroNav({
     const fetchCategories = async () => {
       try {
         // Replace this URL with your actual backend endpoint route
-     const res = await fetch(`${API_URL}/api/categories`);
+     const res = await fetch(`${API_URL}/categories`);
 
 if (!res.ok) {
   const errorDetails = await res.text();
 
   console.error("Categories API failed:", {
-    url: `${API_URL}/api/categories`,
+    url: `${API_URL}/categories`,
     status: res.status,
     response: errorDetails,
   });

@@ -40,7 +40,7 @@ ChartJS.register(
   Filler
 );
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
 export default function Dashboard() {
   const [orders, setOrders] = useState([]);
@@ -68,8 +68,8 @@ export default function Dashboard() {
       };
 
       const [ordersResponse, menuResponse] = await Promise.all([
-        fetch(`${API_URL}/api/orders`, fetchOptions),
-        fetch(`${API_URL}/api/menu`, fetchOptions),
+        fetch(`${API_URL}/orders`, fetchOptions),
+        fetch(`${API_URL}/menu`, fetchOptions),
       ]);
 
       // ✅ ADDED: Handle 401 Unauthorized specifically

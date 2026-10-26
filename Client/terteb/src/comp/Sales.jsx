@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
 // Added your authService import here
 import authService from "../services/authService";
@@ -43,7 +43,7 @@ export default function Sales() {
 
       // 2. Pass the token in the headers
       const response = await fetch(
-        `${API_URL}/api/orders/reports?period=${period}`,
+        `${API_URL}/orders/reports?period=${period}`,
         {
           method: "GET",
           headers: {

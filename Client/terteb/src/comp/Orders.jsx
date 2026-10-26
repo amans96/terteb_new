@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import authService from "../services/authService";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -21,7 +21,7 @@ export default function Orders() {
     try {
       const token = authService.getToken();
       
-      const response = await fetch(`${API_URL}/api/orders`, {
+      const response = await fetch(`${API_URL}/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -57,7 +57,7 @@ export default function Orders() {
       setUpdatingOrder(id);
       const token = authService.getToken();
       
-      const response = await fetch(`${API_URL}/api/orders/${id}/status`, {
+      const response = await fetch(`${API_URL}/orders/${id}/status`, {
         method: "PATCH",
         headers: { 
           "Content-Type": "application/json",

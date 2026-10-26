@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import CategoryForm from "./CategoryForm.jsx";
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
 export default function Categories() {
   const [categories, setCategories] = useState([]);
@@ -11,7 +11,7 @@ export default function Categories() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/categories`);
+      const response = await fetch(`${API_URL}/categories`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch categories");
@@ -60,7 +60,7 @@ export default function Categories() {
 
     try {
       const response = await fetch(
-        `${API_URL}/api/categories/${id}`,
+        `${API_URL}/categories/${id}`,
         {
           method: "DELETE",
         }

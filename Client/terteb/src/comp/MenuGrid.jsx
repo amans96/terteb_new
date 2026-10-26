@@ -111,7 +111,7 @@ export default function MenuGrid({ section, selectedCategory }) {
 
       try {
         const endpoint = API_URL
-          ? `${API_URL}/api/menu`
+          ? `${API_URL}/menu`
           : "/api/menu";
         const response = await fetch(endpoint, {
           signal: controller.signal,
@@ -210,7 +210,7 @@ export default function MenuGrid({ section, selectedCategory }) {
 
     try {
       const endpoint = API_URL
-        ? `${API_URL}/api/orders`
+        ? `${API_URL}/orders`
         : "/api/orders";
       const response = await fetch(endpoint, {
         method: "POST",
