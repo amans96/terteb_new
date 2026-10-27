@@ -66,9 +66,9 @@ export default function MenuGrid({ section, selectedCategory }) {
     return (
       categoryStyles[categoryName] ||
       categoryStyles[
-        Object.keys(categoryStyles).find(
-          (key) => normalize(key) === normalize(categoryName)
-        )
+      Object.keys(categoryStyles).find(
+        (key) => normalize(key) === normalize(categoryName)
+      )
       ] ||
       categoryStyles.Default
     );
@@ -83,9 +83,12 @@ export default function MenuGrid({ section, selectedCategory }) {
       // an "available" field at all.
       if (food.available === false) return false;
 
-      const categoryName = normalize(getCategoryName(food.category));
       const foodSection = normalize(
-        food.section?.name ?? food.section ?? food.mealSection ?? ""
+        food.section?.name ??
+        food.section ??
+        food.mealSection ??
+        food.category?.section ??
+        ""
       );
 
       const matchesCategory =
@@ -248,11 +251,10 @@ export default function MenuGrid({ section, selectedCategory }) {
       {toast.show && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
           <div
-            className={`flex items-center gap-2 px-5 py-3 rounded-full shadow-lg border ${
-              toast.type === "error"
-                ? "bg-red-50 border-red-200 text-red-800"
-                : "bg-gray-900 border-gray-800 text-white"
-            }`}
+            className={`flex items-center gap-2 px-5 py-3 rounded-full shadow-lg border ${toast.type === "error"
+              ? "bg-red-50 border-red-200 text-red-800"
+              : "bg-gray-900 border-gray-800 text-white"
+              }`}
           >
             {toast.type === "error" ? (
               <AlertCircle size={18} />
@@ -460,11 +462,10 @@ export default function MenuGrid({ section, selectedCategory }) {
                 type="button"
                 onClick={placeOrder}
                 disabled={cart.length === 0}
-                className={`w-full py-3.5 rounded-xl font-bold flex justify-center items-center gap-2 transition-all shadow-sm ${
-                  cart.length > 0
-                    ? "bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-md"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                }`}
+                className={`w-full py-3.5 rounded-xl font-bold flex justify-center items-center gap-2 transition-all shadow-sm ${cart.length > 0
+                  ? "bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-md"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  }`}
               >
                 Place Order
               </button>
