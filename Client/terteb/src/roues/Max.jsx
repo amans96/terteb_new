@@ -1,12 +1,16 @@
+
 import { createBrowserRouter } from "react-router-dom";
+
 import Login from "../pages/Login.jsx";
 import Customer from "../pages/Customer.jsx";
 import Admin from "../pages/Admin.jsx";
+
 import Dashboard from "../comp/Dashboard.jsx";
-import Men from  "../comp/Men.jsx"
+import Men from "../comp/Men.jsx";
 import Categories from "../comp/Categories.jsx";
 import Orders from "../comp/Orders.jsx";
 import Sales from "../comp/Sales.jsx";
+import Finance from "../comp/Finance.jsx";
 
 const Max = createBrowserRouter([
   {
@@ -46,6 +50,10 @@ const Max = createBrowserRouter([
       {
         path: "sales",
         element: <Sales />,
+      },
+      {
+        path: "finance",
+        element: <Finance />,
       },
     ],
   },
