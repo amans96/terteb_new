@@ -128,17 +128,25 @@ export const getOrders = async (req, res) => {
 // ===============================
 export const updateOrderStatus = async (req, res) => {
   try {
-    const { status } = req.body;
     const { id } = req.params;
+    const normalizedStatus = String(req.body.status ?? "")
+      .trim()
+      .toUpperCase();
 
-    // ✅ Check if ID is provided
     if (!id) {
       return res.status(400).json({
-        message: "Order ID is required",
+        message: "Order ID is required.",
       });
     }
 
-    const normalizedStatus = String(status ?? "").trim().toUpperCase();
+    const isAdmin = req.user?.role === "ADMIN";
+    const isStaff = req.user?.role === "STAFF";
+
+    if (!isAdmin && !isStaff) {
+      return res.status(403).json({
+        message: "You are not authorized to update orders.",
+      });
+    }
 
     if (!VALID_ORDER_STATUSES.includes(normalizedStatus)) {
       return res.status(400).json({
@@ -146,13 +154,50 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const order = await prisma.order.update({
-      where: {
-        id: id,
-      },
-      data: {
-        status: normalizedStatus,
-      },
+    // Staff can only approve a pending order by marking it TAKEN.
+    if (isStaff && normalizedStatus !== "TAKEN") {
+      return res.status(403).json({
+        message: "Waiters can only approve orders.",
+      });
+    }
+
+    // Ensure staff can only approve orders that are still pending.
+    if (isStaff) {
+      const result = await prisma.order.updateMany({
+        where: {
+          id,
+          status: "PENDING",
+        },
+        data: {
+          status: "TAKEN",
+        },
+      });
+
+      if (result.count === 0) {
+        const existingOrder = await prisma.order.findUnique({
+          where: { id },
+          select: { id: true },
+        });
+
+        if (!existingOrder) {
+          return res.status(404).json({
+            message: "Order not found.",
+          });
+        }
+
+        return res.status(409).json({
+          message: "This order has already been processed.",
+        });
+      }
+    } else {
+      await prisma.order.update({
+        where: { id },
+        data: { status: normalizedStatus },
+      });
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id },
       include: {
         items: {
           include: {
@@ -162,22 +207,21 @@ export const updateOrderStatus = async (req, res) => {
       },
     });
 
-    res.json({
+    return res.json({
       message: "Order status updated successfully.",
       order,
     });
   } catch (error) {
     console.error("UPDATE ORDER STATUS ERROR:", error);
-    
-    // ✅ Handle "record not found" error
-    if (error.code === 'P2025') {
+
+    if (error.code === "P2025") {
       return res.status(404).json({
-        message: "Order not found",
+        message: "Order not found.",
       });
     }
-    
-    res.status(500).json({
-      message: error.message,
+
+    return res.status(500).json({
+      message: "Failed to update order status.",
     });
   }
 };
@@ -191,7 +235,7 @@ export const updateOrderStatus = async (req, res) => {
 export const getSalesReport = async (req, res) => {
   try {
     const { period = "daily" } = req.query;
-    
+
     const now = new Date();
     let startDate;
 
@@ -223,7 +267,7 @@ export const getSalesReport = async (req, res) => {
         },
       },
       orderBy: {
-        createdAt: "asc", 
+        createdAt: "asc",
       },
     });
 
@@ -270,7 +314,7 @@ export const getSalesReport = async (req, res) => {
       let label = "";
 
       if (period === "daily") {
-        label = `${orderDate.getHours()}:00`; 
+        label = `${orderDate.getHours()}:00`;
       } else if (period === "weekly") {
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         label = days[orderDate.getDay()];
