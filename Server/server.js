@@ -7,7 +7,8 @@ import menuRoutes from "./routes/menuRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
-
+import expenseRoutes from "./routes/expenseRoutes.js";
+import profitRoutes from "./routes/profitRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -67,6 +68,8 @@ app.use("/api/menu", menuRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/expenses", expenseRoutes);
+app.use("/api/profit", profitRoutes);
 
 // =====================================
 // ROOT
