@@ -1,9 +1,9 @@
-
 import { createBrowserRouter } from "react-router-dom";
 
 import Login from "../pages/Login.jsx";
 import Customer from "../pages/Customer.jsx";
 import Admin from "../pages/Admin.jsx";
+import Waiter from "../pages/Waiter.jsx";
 
 import Dashboard from "../comp/Dashboard.jsx";
 import Men from "../comp/Men.jsx";
@@ -17,12 +17,14 @@ const Max = createBrowserRouter([
     path: "/",
     element: <Customer />,
   },
-
   {
     path: "/login",
     element: <Login />,
   },
-
+  {
+    path: "/waiter",
+    element: <Orders />,
+  },
   {
     path: "/admin",
     element: <Admin />,
