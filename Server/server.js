@@ -10,6 +10,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import profitRoutes from "./routes/profitRoutes.js";
 import receiptVerificationRoutes from "./routes/receiptVerificationRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -72,6 +73,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/profit", profitRoutes);
 app.use("/api/receipt-verification", receiptVerificationRoutes);
+app.use("/api/ai", aiRoutes);
 
 // =====================================
 // ROOT
