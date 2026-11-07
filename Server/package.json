@@ -14,12 +14,14 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "google-auth-library": "^11.3.3",
     "groq-sdk": "^1.6.0",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.5.0",
     "mongoose": "^9.7.4",
     "multer": "^2.2.0",
-    "prisma": "^6.19.3"
+    "prisma": "^6.19.3",
+    "resend": "^6.37.0"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

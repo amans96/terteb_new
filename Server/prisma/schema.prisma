@@ -14,6 +14,7 @@ model MenuCategory {
   section   MenuSection
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+
   items     MenuItem[]
 
   @@unique([name, section])
@@ -30,6 +31,7 @@ model MenuItem {
   categoryId  String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
   category    MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   orderItems  OrderItem[]
 }
@@ -49,7 +51,13 @@ model Order {
   paymentMethod PaymentMethod?
   paid          Boolean        @default(false)
   paymentImage  String?
+
+  customerId    String?
+  customer      Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
   items         OrderItem[]
+
+  @@index([customerId])
 }
 
 model OrderItem {
@@ -60,6 +68,7 @@ model OrderItem {
   price      Decimal  @db.Decimal(10, 2)
   subtotal   Decimal  @db.Decimal(10, 2)
   createdAt  DateTime @default(now())
+
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
   order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
@@ -75,24 +84,54 @@ model User {
 
   expenses  Expense[]
 }
-model Expense {
-  id          String         @id @default(cuid())
-  title       String
-  description String?
-  amount      Decimal        @db.Decimal(10, 2)
-  category    ExpenseCategory @default(OTHER)
-  expenseDate DateTime       @default(now())
-  notes       String?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
 
-  recordedById String
-  recordedBy   User           @relation(fields: [recordedById], references: [id], onDelete: Restrict)
+model Expense {
+  id            String          @id @default(cuid())
+  title         String
+  description   String?
+  amount        Decimal         @db.Decimal(10, 2)
+  category      ExpenseCategory @default(OTHER)
+  expenseDate   DateTime        @default(now())
+  notes         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  recordedById  String
+  recordedBy    User            @relation(fields: [recordedById], references: [id], onDelete: Restrict)
 
   @@index([expenseDate])
   @@index([category])
   @@index([recordedById])
 }
+
+model Customer {
+  id                 String                  @id @default(cuid())
+  name               String
+  email              String                  @unique
+  password           String?
+  googleId           String?                 @unique
+  emailVerifiedAt    DateTime?
+  phone              String?
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+
+  orders             Order[]
+  verificationTokens EmailVerificationToken[]
+}
+
+model EmailVerificationToken {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  customerId String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([expiresAt])
+}
+
 enum ExpenseCategory {
   FOOD_SUPPLIES
   BEVERAGES
