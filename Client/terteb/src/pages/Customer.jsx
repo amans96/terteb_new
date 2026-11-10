@@ -10,10 +10,17 @@ export default function Customer() {
   const [section, setSection] = useState("FOOD");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // AI chat state
+  // Chat state
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Voice state
+  const [isRecording, setIsRecording] = useState(false);
+  const [voiceLanguage, setVoiceLanguage] = useState("am-ET");
+
+  const recognitionRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   const [messages, setMessages] = useState([
     {
@@ -23,8 +30,6 @@ export default function Customer() {
     },
   ]);
 
-  const messagesEndRef = useRef(null);
-
   // Scroll to the latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -32,13 +37,90 @@ export default function Customer() {
     });
   }, [messages, isLoading]);
 
-  // Send message to the AI backend
+  // Clean up speech recognition when component unmounts
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, []);
+
+  // Start or stop microphone recording
+  const toggleRecording = () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert(
+        "Speech recognition is not supported in this browser. Please use Google Chrome."
+      );
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = voiceLanguage;
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    recognition.onresult = (event) => {
+      let transcript = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+
+      setMessage(transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      setIsRecording(false);
+
+      if (event.error === "not-allowed") {
+        alert("Please allow microphone access to use voice input.");
+      } else if (event.error === "no-speech") {
+        console.log("No speech detected. Try speaking again.");
+      }
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+
+    try {
+      recognition.start();
+    } catch (error) {
+      console.error("Could not start microphone:", error);
+      setIsRecording(false);
+    }
+  };
+
+  // Send message to Terteb AI
   const sendMessage = async (e) => {
     e.preventDefault();
 
     const trimmedMessage = message.trim();
 
     if (!trimmedMessage || isLoading) return;
+
+    // Stop recording before sending
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+    }
 
     setMessages((previous) => [
       ...previous,
@@ -69,7 +151,10 @@ export default function Customer() {
 
       setMessages((previous) => [
         ...previous,
-        { role: "assistant", content: data.reply },
+        {
+          role: "assistant",
+          content: data.reply,
+        },
       ]);
     } catch (error) {
       console.error("Terteb AI request failed:", error);
@@ -89,7 +174,6 @@ export default function Customer() {
 
   return (
     <>
-      {/* Existing customer page */}
       <Hero />
 
       <Heron
@@ -106,7 +190,6 @@ export default function Customer() {
 
       {/* AI Chat Assistant */}
       <div className="fixed bottom-6 right-6 z-[9999]">
-        {/* Chat Window */}
         {isChatOpen && (
           <div className="absolute bottom-20 right-0 flex h-[530px] max-h-[calc(100dvh-120px)] w-[370px] max-w-[calc(100vw-30px)] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
 
@@ -129,7 +212,13 @@ export default function Customer() {
 
               <button
                 type="button"
-                onClick={() => setIsChatOpen(false)}
+                onClick={() => {
+                  if (isRecording) {
+                    recognitionRef.current?.stop();
+                    setIsRecording(false);
+                  }
+                  setIsChatOpen(false);
+                }}
                 className="rounded-full px-2 text-2xl text-gray-300 transition hover:bg-neutral-700 hover:text-white"
                 aria-label="Close chat"
               >
@@ -188,21 +277,61 @@ export default function Customer() {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Voice language selector */}
+            <div className="flex items-center justify-between border-t border-gray-100 bg-white px-4 py-2">
+              <span className="text-xs text-gray-500">
+                Voice input language
+              </span>
+
+              <select
+                value={voiceLanguage}
+                onChange={(e) => setVoiceLanguage(e.target.value)}
+                disabled={isRecording || isLoading}
+                className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs outline-none focus:border-neutral-500"
+              >
+                <option value="am-ET">Amharic</option>
+                <option value="en-US">English</option>
+              </select>
+            </div>
+
             {/* Message Input */}
             <form
               onSubmit={sendMessage}
               className="flex items-center gap-2 border-t border-gray-200 bg-white p-3"
             >
+              {/* Microphone */}
+              <button
+                type="button"
+                onClick={toggleRecording}
+                disabled={isLoading}
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-lg transition ${
+                  isRecording
+                    ? "animate-pulse bg-red-600 text-white"
+                    : "bg-gray-100 text-neutral-800 hover:bg-gray-200"
+                } disabled:cursor-not-allowed disabled:opacity-40`}
+                aria-label={
+                  isRecording ? "Stop recording" : "Start voice recording"
+                }
+                title={isRecording ? "Stop recording" : "Speak"}
+              >
+                {isRecording ? "■" : "🎙️"}
+              </button>
+
               <input
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Ask me about our menu..."
+                placeholder={
+                  isRecording
+                    ? "Listening..."
+                    : "Ask me about our menu..."
+                }
                 disabled={isLoading}
                 maxLength={2000}
                 className="min-w-0 flex-1 rounded-full border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-neutral-500 focus:ring-2 focus:ring-neutral-100 disabled:bg-gray-100"
               />
 
+              {/* Send */}
               <button
                 type="submit"
                 disabled={!message.trim() || isLoading}
@@ -213,7 +342,6 @@ export default function Customer() {
               </button>
             </form>
 
-            {/* Footer */}
             <div className="bg-white pb-2 text-center text-[10px] text-gray-400">
               Powered by Terteb AI
             </div>
